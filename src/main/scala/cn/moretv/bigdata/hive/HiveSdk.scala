@@ -1,5 +1,6 @@
 package cn.moretv.bigdata.hive
 
+import java.io.File
 import java.sql.ResultSet
 
 import cn.moretv.bigdata.hive.global.EnvEnum.EnvEnum
@@ -20,6 +21,15 @@ case class HiveSdk(env: EnvEnum) {
   private val hiveSqlService = HiveSqlService(env)
   private val sparkSqlService = SparkSqlService(env)
 
+  /**
+    * 判断表是否存在
+    * @param dbName 数据库名
+    * @param tableName  表名
+    * @return true 存在，false 不存在
+    */
+  def exists(dbName: String, tableName: String): Boolean = {
+    hiveMetaService.getTables(dbName,tableName).nonEmpty
+  }
   /**
     * 创建hive表
     *
