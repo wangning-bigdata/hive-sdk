@@ -80,6 +80,24 @@ object HiveTable {
   }
 
   /**
+    * 拼接添加字段SQL
+    * @param hiveTable hive表
+    * @param hiveColumnList 字段集合
+    * @return 添加字段语句
+    */
+  def getReplaceColumnSql(hiveTable: HiveTable, hiveColumnList: Seq[HiveColumn]): String = {
+    val stringBuffer = new StringBuffer("ALTER TABLE ")
+    stringBuffer.append(s"${hiveTable.dbName}.${hiveTable.tableName} ")
+    stringBuffer.append("REPLACE COLUMNS ( \n")
+    val columnStr = hiveColumnList.map(hiveColumn => {
+      s"  `${hiveColumn.columnName}` ${hiveColumn.columnType}"
+    }).mkString(", \n")
+    stringBuffer.append(columnStr)
+    stringBuffer.append(" )")
+    stringBuffer.toString
+  }
+
+  /**
     * 获取更改字段名或字段类型的语句
     * @param hiveTable hive表
     * @param hiveColumnMap 更改前字段名 -> 更改后的字段名和字段类型

@@ -58,6 +58,15 @@ class TestHiveSdk {
   }
 
   @Test
+  def test_replaceColumns(): Unit ={
+    val hiveColumnList = List(HiveColumn("name", "string", false), HiveColumn("age", "int", false), HiveColumn("gender", "string", false))
+    val columnsBefore = hiveSdkTest.getColumns(testDbName, testTableName)
+    hiveSdkTest.replaceColumns(testDbName, testTableName, hiveColumnList)
+    val columnsAfter = hiveSdkTest.getColumns(testDbName, testTableName)
+    assert(columnsBefore.exists(_.columnName == "sex") && columnsBefore.exists(_.columnName == "height") && !columnsAfter.exists(_.columnName == "sex") && !columnsAfter.exists(_.columnName == "height") && columnsAfter.exists(_.columnName == "name") && columnsAfter.exists(_.columnName == "age") && columnsAfter.exists(_.columnName == "gender"))
+  }
+
+  @Test
   def test_dropPartition_addPartition_getAllPartitions(): Unit = {
     val partitionMap = Map("key_day" -> "20180709", "key_hour" -> "12")
     val location = "hdfs://hans/data_warehouse/ods_view.db/test_temp_table/key_day=20180709/key_hour=12"

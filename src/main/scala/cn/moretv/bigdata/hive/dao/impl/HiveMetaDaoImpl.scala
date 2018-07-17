@@ -9,12 +9,15 @@ import scala.collection.JavaConversions._
 
 case class HiveMetaDaoImpl(env: EnvEnum) extends HiveMetaDao {
 
-  val db = SqlUtil(env)
-  val tableSql = "SELECT a.TBL_ID,a.TBL_NAME FROM TBLS a JOIN DBS b on a.DB_ID = b.DB_ID WHERE b.NAME = ? AND a.TBL_NAME LIKE ? "
-  val allPartitionSql = "select part_name,location from PARTITIONS a join SDS b on a.sd_id = b.sd_id where a.tbl_id = ? order by part_name desc"
-  val partitionSql = "select part_name,location from PARTITIONS a join SDS b on a.sd_id = b.sd_id where a.tbl_id = ? and part_name >= ? and part_name <= ? order by part_name desc"
-  val lastPartitionSql = "select part_name,location from PARTITIONS a join SDS b on a.sd_id = b.sd_id where a.tbl_id = ? order by part_name desc limit 1"
-  val columnSql = "select c.COLUMN_NAME,c.TYPE_NAME from TBLS a join SDS b on a.SD_ID = b.SD_ID join COLUMNS_V2 c on b.CD_ID = c.CD_ID where a.TBL_ID = ?"
+  private val db = SqlUtil(env)
+  private val tableSql = "SELECT a.TBL_ID,a.TBL_NAME FROM TBLS a JOIN DBS b on a.DB_ID = b.DB_ID WHERE b.NAME = ? AND a.TBL_NAME LIKE ? "
+  private val allPartitionSql = "select part_name,location from PARTITIONS a join SDS b on a.sd_id = b.sd_id where a.tbl_id = ? order by part_name desc"
+  private val partitionSql = "select part_name,location from PARTITIONS a join SDS b on a.sd_id = b.sd_id where a.tbl_id = ? and part_name >= ? and part_name <= ? order by part_name desc"
+  private val lastPartitionSql = "select part_name,location from PARTITIONS a join SDS b on a.sd_id = b.sd_id where a.tbl_id = ? order by part_name desc limit 1"
+  private val columnSql = "select c.COLUMN_NAME,c.TYPE_NAME from TBLS a join SDS b on a.SD_ID = b.SD_ID join COLUMNS_V2 c on b.CD_ID = c.CD_ID where a.TBL_ID = ?"
+  private val queryTableCdidSql = "select b.CD_ID from TBLS a join SDS b on a.SD_ID = b.SD_ID and a.TBL_ID = ?"
+  private val queryPartitionSdid = "select SD_ID from PARTITIONS where TBL_ID = ?"
+  private val updatePartitionCdidSql = "update SDS set CD_ID = ? where SD_ID in "
 
   /**
     * 获取某个数据库下所有的表
@@ -70,7 +73,7 @@ case class HiveMetaDaoImpl(env: EnvEnum) extends HiveMetaDao {
     * @param tableId 表ID，唯一标识
     * @return 表中所有的列名及类型，不包含分区字段
     */
-  override def getColumns(tableId: Long):List[HiveColumn] = {
+  override def getColumns(tableId: Long): List[HiveColumn] = {
     val columnArray = db.selectArrayList(columnSql, tableId)
     columnArray.map(arr => {
       val columnName = arr(0).toString
@@ -105,4 +108,32 @@ case class HiveMetaDaoImpl(env: EnvEnum) extends HiveMetaDao {
     db.delete(sql)
   }
 
+  /**
+    * 获取表对应的CD_ID
+    *
+    * @param tableId 表ID
+    */
+  override def queryTableCdid(tableId: Long) = {
+    val arr = db.selectOne(queryTableCdidSql, tableId)
+    arr(0).toString.toLong
+  }
+
+  /**
+    * 查询各分区的SD_ID
+    *
+    * @param tableId 表ID
+    * @return 各分区的SD_ID集合
+    */
+  override def queryPartitionSdid(tableId: Long): List[Long] = {
+    val partArr = db.selectArrayList(queryPartitionSdid, tableId)
+    partArr.map(arr => {
+      arr(0).toString.toLong
+    }).toList
+  }
+
+  override def updatePartitionCdid(cdid: Long, sdid: List[Long]) = {
+    val sdidStr = sdid.mkString(",")
+    val sql = s"$updatePartitionCdidSql ($sdidStr)"
+    db.update(sql,cdid)
+  }
 }

@@ -14,21 +14,40 @@ case class HiveMetaService(env: EnvEnum) {
 
   /**
     * 获取特定数据库下符合表模式的所有表
-    * @param dbName 数据库名
+    *
+    * @param dbName       数据库名
     * @param tablePattern 表模式
     * @return hive表集合
     */
   def getTables(dbName: String, tablePattern: String = "%"): Seq[HiveTable] = {
-    hiveMetaDao.getTables(dbName,tablePattern)
+    hiveMetaDao.getTables(dbName, tablePattern)
+  }
+
+  /**
+    * 刷新匹配到的表的所有分区
+    *
+    * @param dbName       数据库名
+    * @param tablePattern 表模式
+    */
+  def refreshAllPartitions(dbName: String, tablePattern: String): Unit = {
+    val hiveTables = getTables(dbName, tablePattern)
+    hiveTables.foreach(hiveTable => {
+      val tableId = hiveTable.tableId
+      val cdid = hiveMetaDao.queryTableCdid(tableId)
+      val sdids = hiveMetaDao.queryPartitionSdid(tableId)
+      hiveMetaDao.updatePartitionCdid(cdid, sdids)
+
+    })
   }
 
   /**
     * 获取指定hive表的所有分区
-    * @param dbName 数据库名称
+    *
+    * @param dbName    数据库名称
     * @param tableName 表名
     * @return 分区信息集合
     */
-  def getAllPartitions(dbName: String, tableName: String): Map[String, Map[String, String]] ={
+  def getAllPartitions(dbName: String, tableName: String): Map[String, Map[String, String]] = {
     val tables = hiveMetaDao.getTables(dbName, tableName)
     val tableId = tables.head.tableId
     val partitions = hiveMetaDao.getAllPartitions(tableId)
@@ -36,7 +55,7 @@ case class HiveMetaService(env: EnvEnum) {
       val location = hp.location
       val partMap = hp.partName.split("/").map(kv => {
         val kvs = kv.split("=")
-        (kvs(0),kvs(1))
+        (kvs(0), kvs(1))
       }).toMap
       location -> partMap
     }).toMap
@@ -44,7 +63,8 @@ case class HiveMetaService(env: EnvEnum) {
 
   /**
     * 获取字段列表，不包含分区字段
-    * @param dbName 数据库名称
+    *
+    * @param dbName    数据库名称
     * @param tableName 表名
     * @return
     */
@@ -53,6 +73,7 @@ case class HiveMetaService(env: EnvEnum) {
     val tableId = tables.head.tableId
     hiveMetaDao.getColumns(tableId)
   }
+
   /**
     * 获取已合并可执行的Hive drop & add SQL
     *

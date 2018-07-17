@@ -1,6 +1,5 @@
 package cn.moretv.bigdata.hive
 
-import java.io.File
 import java.sql.ResultSet
 
 import cn.moretv.bigdata.hive.global.EnvEnum.EnvEnum
@@ -23,13 +22,15 @@ case class HiveSdk(env: EnvEnum) {
 
   /**
     * 判断表是否存在
-    * @param dbName 数据库名
-    * @param tableName  表名
+    *
+    * @param dbName    数据库名
+    * @param tableName 表名
     * @return true 存在，false 不存在
     */
   def exists(dbName: String, tableName: String): Boolean = {
-    hiveMetaService.getTables(dbName,tableName).nonEmpty
+    hiveMetaService.getTables(dbName, tableName).nonEmpty
   }
+
   /**
     * 创建hive表
     *
@@ -56,14 +57,28 @@ case class HiveSdk(env: EnvEnum) {
 
   /**
     * 改变字段名称或类型
-    * @param dbName 数据库名
-    * @param tableName 表名
+    *
+    * @param dbName        数据库名
+    * @param tableName     表名
     * @param hiveColumnMap 字段列表，Map[旧字段名，新字段信息]
     */
-  def changeColumns(dbName: String, tableName: String, hiveColumnMap: Map[String,HiveColumn]): Unit = {
+  def changeColumns(dbName: String, tableName: String, hiveColumnMap: Map[String, HiveColumn]): Unit = {
     val hiveTable = new HiveTable(dbName, tableName)
     val changeColumns = HiveTable.getChangeColumnSql(hiveTable, hiveColumnMap)
     changeColumns.foreach(hiveSqlService.execute)
+  }
+
+  /**
+    * 替换hive表schema
+    *
+    * @param dbName         数据库名
+    * @param tableName      表名
+    * @param hiveColumnList 字段列表
+    */
+  def replaceColumns(dbName: String, tableName: String, hiveColumnList: Seq[HiveColumn]): Unit = {
+    val hiveTable = new HiveTable(dbName, tableName)
+    val replaceColumnSql = HiveTable.getReplaceColumnSql(hiveTable, hiveColumnList)
+    hiveSqlService.execute(replaceColumnSql)
   }
 
   /**
@@ -119,6 +134,19 @@ case class HiveSdk(env: EnvEnum) {
   }
 
   /**
+    * 添加单个分区，先删除分区再添加分区
+    *
+    * @param dbName       数据库名
+    * @param tableName    表名
+    * @param partitionMap 分区字段和值
+    * @param location     存储位置
+    */
+  def addPartitionAfterDrop(dbName: String, tableName: String, partitionMap: Map[String, String], location: String): Unit = {
+    dropPartition(dbName, tableName, partitionMap)
+    addPartition(dbName, tableName, partitionMap, location)
+  }
+
+  /**
     * 添加多个分区
     *
     * @param dbName           数据库名
@@ -140,6 +168,21 @@ case class HiveSdk(env: EnvEnum) {
   }
 
   /**
+    * 添加多个分区，先删除分区，再添加分区
+    *
+    * @param dbName           数据库名
+    * @param tableName        表名
+    * @param partitionInfoMap 多个分区的信息集合，key为location，value为分区字段和值的集合
+    */
+  def addPartitionsAfterDrop(dbName: String, tableName: String, partitionInfoMap: Map[String, Map[String, String]]): Unit = {
+    partitionInfoMap.foreach(e => {
+      val partMap = e._2
+      dropPartition(dbName, tableName, partMap)
+    })
+    addPartitions(dbName, tableName, partitionInfoMap)
+  }
+
+  /**
     * 删除分区
     *
     * @param dbName       数据库名称
@@ -157,16 +200,14 @@ case class HiveSdk(env: EnvEnum) {
   }
 
   /**
-    * 刷新partition，先drop对应的partition，然后再add partition
+    * 刷新所有分区，刷新方式为将所有分区的CD_ID改为表最新的CD_ID
     *
     * @param dbName       数据库名称
-    * @param tableName    表名
-    * @param partitionMap 分区字段和值集合
-    * @param location     数据存储路径
+    * @param tablePattern 表模式，如：log_medusa_main3x_%
     */
-  def refreshPartition(dbName: String, tableName: String, partitionMap: Map[String, String], location: String): Unit = {
-    dropPartition(dbName, tableName, partitionMap)
-    addPartition(dbName, tableName, partitionMap, location)
+  @deprecated
+  def refreshAllPartitions(dbName: String, tablePattern: String): Unit = {
+    hiveMetaService.refreshAllPartitions(dbName, tablePattern)
   }
 
   /**
