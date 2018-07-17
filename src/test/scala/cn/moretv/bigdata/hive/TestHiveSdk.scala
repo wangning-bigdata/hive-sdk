@@ -63,7 +63,7 @@ class TestHiveSdk {
     val columnsBefore = hiveSdkTest.getColumns(testDbName, testTableName)
     hiveSdkTest.replaceColumns(testDbName, testTableName, hiveColumnList)
     val columnsAfter = hiveSdkTest.getColumns(testDbName, testTableName)
-    assert(columnsBefore.exists(_.columnName == "sex") && columnsBefore.exists(_.columnName == "height") && !columnsAfter.exists(_.columnName == "sex") && !columnsAfter.exists(_.columnName == "height") && columnsAfter.exists(_.columnName == "name") && columnsAfter.exists(_.columnName == "age") && columnsAfter.exists(_.columnName == "gender"))
+    assert(columnsBefore.exists(_.columnName == "weight") && columnsBefore.exists(_.columnName == "height") && !columnsAfter.exists(_.columnName == "weight") && !columnsAfter.exists(_.columnName == "height") && columnsAfter.exists(_.columnName == "name") && columnsAfter.exists(_.columnName == "age") && columnsAfter.exists(_.columnName == "gender"))
   }
 
   @Test
