@@ -32,6 +32,17 @@ case class HiveSdk(env: EnvEnum) {
   }
 
   /**
+    * 判断表是否存在
+    *
+    * @param dbName    数据库名
+    * @param tablePattern 表名模式
+    * @return 匹配到的表名集合
+    */
+  def getTables(dbName: String, tablePattern: String = "%"): List[String] = {
+    hiveMetaService.getTables(dbName, tablePattern).map(_.tableName).toList
+  }
+
+  /**
     * 创建hive表
     *
     * @param hiveTable      hive表
@@ -249,14 +260,5 @@ case class HiveSdk(env: EnvEnum) {
     hiveSqlService.execute(sql)
   }
 
-  /**
-    * 执行查询语句
-    *
-    * @param sql 查询语句
-    * @return 查询结果
-    */
-  def executeQuery(sql: String): ResultSet = {
-    hiveSqlService.executeQuery(sql)
-  }
 
 }
