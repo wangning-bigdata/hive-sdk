@@ -216,7 +216,6 @@ case class HiveSdk(env: EnvEnum) {
     * @param dbName       数据库名称
     * @param tablePattern 表模式，如：log_medusa_main3x_%
     */
-  @deprecated
   def refreshAllPartitions(dbName: String, tablePattern: String): Unit = {
     hiveMetaService.refreshAllPartitions(dbName, tablePattern)
   }

@@ -190,7 +190,7 @@ case class HiveMetaService(env: EnvEnum) {
     val finalColumns = hiveColumns.filter(hc => {
       !columns.contains(hc.columnName)
     })
-    val columnSql = finalColumns.map(c => s"${c.columnName} ${c.columnType}").mkString(" , ")
+    val columnSql = finalColumns.map(c => s"`${c.columnName}` ${c.columnType}").mkString(" , ")
     s"ALTER TABLE `$dbName`.`$tableName` replace columns ($columnSql)"
   }
 
