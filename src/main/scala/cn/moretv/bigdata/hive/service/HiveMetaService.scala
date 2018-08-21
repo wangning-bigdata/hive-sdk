@@ -188,9 +188,9 @@ case class HiveMetaService(env: EnvEnum) {
     val tableId = hiveMetaDao.getTables(dbName, tableName).head.tableId
     val hiveColumns = hiveMetaDao.getColumns(tableId)
     val finalColumns = hiveColumns.filter(hc => {
-      !columns.contains(hc.columnName)
+      !columns.contains(hc.columnName.trim)
     })
-    val columnSql = finalColumns.map(c => s"`${c.columnName}` ${c.columnType}").mkString(" , ")
+    val columnSql = finalColumns.map(c => s"`${c.columnName.trim}` ${c.columnType.trim}").mkString(" , ")
     s"ALTER TABLE `$dbName`.`$tableName` replace columns ($columnSql)"
   }
 

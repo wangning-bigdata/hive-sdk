@@ -39,13 +39,13 @@ object HiveTable {
       stringBuffer.append(s"${hiveTable.dbName}.${hiveTable.tableName} ")
       stringBuffer.append("( \n")
       val columnStr = hiveColumnList.filter(c => !c.isPartitionColumn).map(hiveColumn => {
-        s"  `${hiveColumn.columnName}` ${hiveColumn.columnType}"
+        s"  `${hiveColumn.columnName.trim}` ${hiveColumn.columnType.trim}"
       }).mkString(", \n")
       stringBuffer.append(columnStr)
       stringBuffer.append(") \n")
       stringBuffer.append("PARTITIONED BY ( \n")
       val partitionStr = hiveColumnList.filter(c => c.isPartitionColumn).map(hiveColumn => {
-        s"  `${hiveColumn.columnName}` ${hiveColumn.columnType}"
+        s"  `${hiveColumn.columnName.trim}` ${hiveColumn.columnType.trim}"
       }).mkString(", \n")
       stringBuffer.append(partitionStr)
       stringBuffer.append(") \n")
@@ -72,7 +72,7 @@ object HiveTable {
     stringBuffer.append(s"${hiveTable.dbName}.${hiveTable.tableName} ")
     stringBuffer.append("ADD COLUMNS ( \n")
     val columnStr = hiveColumnList.map(hiveColumn => {
-      s"  `${hiveColumn.columnName}` ${hiveColumn.columnType}"
+      s"  `${hiveColumn.columnName.trim}` ${hiveColumn.columnType.trim}"
     }).mkString(", \n")
     stringBuffer.append(columnStr)
     stringBuffer.append(" )")
@@ -90,7 +90,7 @@ object HiveTable {
     stringBuffer.append(s"${hiveTable.dbName}.${hiveTable.tableName} ")
     stringBuffer.append("REPLACE COLUMNS ( \n")
     val columnStr = hiveColumnList.map(hiveColumn => {
-      s"  `${hiveColumn.columnName}` ${hiveColumn.columnType}"
+      s"  `${hiveColumn.columnName.trim}` ${hiveColumn.columnType.trim}"
     }).mkString(", \n")
     stringBuffer.append(columnStr)
     stringBuffer.append(" )")
@@ -111,7 +111,7 @@ object HiveTable {
     hiveColumnMap.map(e => {
       val originalColumnName = e._1
       val hiveColumn = e._2
-      sql + s"`$originalColumnName` `${hiveColumn.columnName}` ${hiveColumn.columnType}"
+      sql + s"`${originalColumnName.trim}` `${hiveColumn.columnName.trim}` ${hiveColumn.columnType.trim}"
     }).toList
   }
 
