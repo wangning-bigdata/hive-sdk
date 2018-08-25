@@ -132,8 +132,10 @@ case class HiveMetaDaoImpl(env: EnvEnum) extends HiveMetaDao {
   }
 
   override def updatePartitionCdid(cdid: Long, sdid: List[Long]) = {
-    val sdidStr = sdid.mkString(",")
-    val sql = s"$updatePartitionCdidSql ($sdidStr)"
-    db.update(sql,cdid)
+    if(sdid.nonEmpty){
+      val sdidStr = sdid.mkString(",")
+      val sql = s"$updatePartitionCdidSql ($sdidStr)"
+      db.update(sql,cdid)
+    }else 0
   }
 }
