@@ -11,7 +11,7 @@ case class SparkSqlDaoImpl(env: EnvEnum) extends SparkSqlDao {
 
 
   lazy val dataSourceUtil: DataSourceUtil = DataSourceUtil(env)
-  lazy val dataSource: DataSource = dataSourceUtil.getHiveDataSource
+  lazy val dataSource: DataSource = dataSourceUtil.getSparkDataSource
   lazy val conn: Connection = dataSource.getConnection
   lazy val stmt: Statement = conn.createStatement()
 
