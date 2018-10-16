@@ -11,8 +11,6 @@ case class HiveSqlDaoImpl(env: EnvEnum) extends HiveSqlDao {
 
   lazy val dataSourceUtil: DataSourceUtil = DataSourceUtil(env)
   lazy val dataSource: DataSource = dataSourceUtil.getHiveDataSource
-  lazy val conn: Connection = dataSource.getConnection
-  lazy val stmt:Statement = conn.createStatement()
 
 
   /**
@@ -24,8 +22,13 @@ case class HiveSqlDaoImpl(env: EnvEnum) extends HiveSqlDao {
     */
   override def showCreateTable(dbName: String, tableName: String): String = {
     val createTableSql = s"show create table `$dbName`.`$tableName`"
-    val rs = executeQuery(createTableSql)
-    ResultSetUtil.rs2String(rs)
+    val conn: Connection = dataSource.getConnection
+    val stmt:Statement = conn.createStatement()
+    val rs = stmt.executeQuery(createTableSql)
+    val result = ResultSetUtil.rs2String(rs)
+    stmt.close()
+    conn.close()
+    result
   }
 
   /**
@@ -33,21 +36,12 @@ case class HiveSqlDaoImpl(env: EnvEnum) extends HiveSqlDao {
     *
     * @param sql 需要执行的SQL
     */
-  override def execute(sql: String): Unit = stmt.execute(sql)
-
-  /**
-    * 链接hiveserver2执行Hive SQL，并返回结果
-    *
-    * @param sql 需要执行的SQL
-    * @return SQL执行结果
-    */
-  override def executeQuery(sql: String): ResultSet = stmt.executeQuery(sql)
-
-  /**
-    * 释放资源
-    */
-  override def destroy(): Unit = {
+  override def execute(sql: String): Unit = {
+    val conn: Connection = dataSource.getConnection
+    val stmt:Statement = conn.createStatement()
+    stmt.execute(sql)
     stmt.close()
     conn.close()
   }
+
 }

@@ -26,6 +26,7 @@ trait HiveMetaDao {
 
   /**
     * 获取最新的partition
+    *
     * @param tableId 表ID，唯一标识
     * @return 返回最新的partition
     */
@@ -54,5 +55,34 @@ trait HiveMetaDao {
     */
   def destroy(): Unit
 
-  def execute(sql:String): Int
+  /**
+    * 执行SQL
+    *
+    * @param sql 待执行SQL
+    * @return 影响的行数
+    */
+  def execute(sql: String): Int
+
+  /**
+    * 获取表对应的CD_ID
+    *
+    * @param tableId 表ID
+    */
+  def queryTableCdid(tableId: Long): Long
+
+  /**
+    * 查询各分区的SD_ID
+    *
+    * @param tableId 表ID
+    * @return 各分区的SD_ID集合
+    */
+  def queryPartitionSdid(tableId: Long): List[Long]
+
+  /**
+    * 更新CD_ID
+    * @param cdid CD_ID
+    * @param sdid
+    * @return
+    */
+  def updatePartitionCdid(cdid: Long, sdid: List[Long]): Int
 }
