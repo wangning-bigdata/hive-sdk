@@ -20,4 +20,12 @@ trait HiveSqlDao {
     */
   def execute(sql: String): Unit
 
+  /**
+    * 链接hiveserver2执行Hive SQL
+    *
+    * @param sql 需要执行的SQL
+    * @return 查询出的结果集
+    */
+  def executeDisposableQuery(sql: String): ResultSet
+
 }

@@ -1,11 +1,11 @@
 package cn.moretv.bigdata.hive.dao.impl
 
 import java.sql.{Connection, ResultSet, Statement}
-import javax.sql.DataSource
 
 import cn.moretv.bigdata.hive.dao.HiveSqlDao
 import cn.moretv.bigdata.hive.global.EnvEnum.EnvEnum
 import cn.moretv.bigdata.hive.util.{DataSourceUtil, ResultSetUtil}
+import javax.sql.DataSource
 
 case class HiveSqlDaoImpl(env: EnvEnum) extends HiveSqlDao {
 
@@ -44,4 +44,15 @@ case class HiveSqlDaoImpl(env: EnvEnum) extends HiveSqlDao {
     conn.close()
   }
 
+  /**
+    * 链接hiveserver2执行Hive SQL
+    *
+    * @param sql 需要执行的SQL
+    * @return 查询结果集
+    */
+  override def executeDisposableQuery(sql: String): ResultSet = {
+    val conn: Connection = dataSource.getConnection
+    val stmt:Statement = conn.createStatement()
+    stmt.executeQuery(sql)
+  }
 }

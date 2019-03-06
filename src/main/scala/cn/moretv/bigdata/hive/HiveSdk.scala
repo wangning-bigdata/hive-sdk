@@ -259,5 +259,13 @@ case class HiveSdk(env: EnvEnum) {
     hiveSqlService.execute(sql)
   }
 
+  /**
+    * 执行一次性的查询，由于连接未释放，因此不适合反复查询的场景
+    *
+    * @param sql HQL语句
+    */
+  def executeDisposableQuery(sql: String): ResultSet = {
+    hiveSqlService.executeDisposableQuery(sql)
+  }
 
 }
