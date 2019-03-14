@@ -55,4 +55,19 @@ case class HiveSqlDaoImpl(env: EnvEnum) extends HiveSqlDao {
     val stmt:Statement = conn.createStatement()
     stmt.executeQuery(sql)
   }
+
+  /**
+    * 链接hiveserver2执行Hive SQL
+    *
+    * @param sql 需要执行的SQL
+    * @return 查询出的结果集
+    */
+  override def executeQuery(sql: String)(op: ResultSet => Unit): Unit = {
+    val conn: Connection = dataSource.getConnection
+    val stmt:Statement = conn.createStatement()
+    val resultSet = stmt.executeQuery(sql)
+    op(resultSet)
+    stmt.close()
+    conn.close()
+  }
 }
