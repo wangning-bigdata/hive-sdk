@@ -21,9 +21,5 @@ case class HiveSqlService(env: EnvEnum) {
     hiveSqlDao.execute(sql)
   }
 
-  def executeQuery(sql:String): ResultSet = {
-    logger.info(sql)
-    hiveSqlDao.executeQuery(sql)
-  }
 
 }
