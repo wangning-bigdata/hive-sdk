@@ -21,5 +21,15 @@ case class HiveSqlService(env: EnvEnum) {
     hiveSqlDao.execute(sql)
   }
 
+  def executeDisposableQuery(sql:String): ResultSet = {
+    logger.info(sql)
+    hiveSqlDao.executeDisposableQuery(sql)
+  }
+
+  def executeQuery(sql:String)(op: ResultSet => Unit): Unit = {
+    logger.info(sql)
+    hiveSqlDao.executeQuery(sql)(op)
+  }
+
 
 }

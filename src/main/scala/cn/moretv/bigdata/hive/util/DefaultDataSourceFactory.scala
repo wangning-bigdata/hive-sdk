@@ -3,9 +3,12 @@ package cn.moretv.bigdata.hive.util
 import java.util.Properties
 
 import com.mchange.v2.c3p0.ComboPooledDataSource
+import org.slf4j.LoggerFactory
 
 
 object DefaultDataSourceFactory {
+
+  val logger = LoggerFactory.getLogger(this.getClass)
   //基本的设置
   val DRIVER_CLASSNAME = "driverClassName"
   val URL = "url"
@@ -42,6 +45,8 @@ object DefaultDataSourceFactory {
     val minSize = properties.getProperty(MINSIZE).toInt
     val maxIdle = properties.getProperty(MAXWAIT).toInt
     val defaultAutoCommit = properties.getProperty(DEFAULTAUTOCOMMIT).toBoolean
+
+    logger.info("connection properties: {}", properties)
 
     dataSource.setJdbcUrl(url)
     dataSource.setDriverClass(driverClassName)
